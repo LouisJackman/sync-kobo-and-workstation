@@ -45,10 +45,10 @@ const STATISTICS_CHANNEL_BOUND: usize = 128;
 
 macro_rules! println_async {
     ($fmt:literal $(, $elem:expr )* $(,)?) => {
-        {
+        async {
             let msg = format!($fmt, $( $elem, )*);
             stdout().write_all(msg.as_bytes()).await?;
-            stdout().write_all(b"\n")
+            stdout().write_all(b"\n").await.map(|_| ())
         }
     };
 }
