@@ -38,7 +38,7 @@ const LONG_ABOUT: &str = "Synchronise books between a workstation and a Kobo e-b
                           defaults are overridden with explicit values, it will likely work on \
                           other OSes too.";
 
-const EXTENSIONS_TO_SYNCHRONISE: [&str; 2] = ["epub", ".pdf"];
+const EXTENSIONS_TO_SYNCHRONISE: [&str; 2] = ["epub", "pdf"];
 
 const FOUND_BOOKS_CHANNEL_BOUND: usize = 128;
 const STATISTICS_CHANNEL_BOUND: usize = 128;
@@ -127,7 +127,7 @@ fn path_str(path: &Path) -> Result<&str> {
         .ok_or_else(|| anyhow!("could not decode a path to UTF-8"))
 }
 
-async fn copy_to_non_existant(
+async fn copy_to_non_existent(
     src_path: &Path,
     dest_path: &Path,
     dry_run: bool,
@@ -171,10 +171,7 @@ async fn sync_books(
         if let Some(book_name) = book.file_name() {
             dest_path.push(book_name);
 
-            if let Ok(copy_task) = copy_to_non_existant(&book, &dest_path, dry_run).await {
-                copy_tasks.push(copy_task);
-                stats.send(Statistic::Copied).await?;
-            } else {
+            if fs::metadata(&dest_path).await.is_ok() {
                 let dest_str = path_str(&dest_path)?;
                 println_async!(
                     "Book {dest_str} already exists on the destination; will not copy across."
@@ -183,6 +180,14 @@ async fn sync_books(
                 stats
                     .send(Statistic::NotCopiedBecauseAlreadyExistedAtDest)
                     .await?;
+            } else {
+                let stats_tx = stats.clone();
+                let copy_task = copy_to_non_existent(&book, &dest_path, dry_run).await?;
+                copy_tasks.push(spawn(async move {
+                    copy_task.await??;
+                    stats_tx.send(Statistic::Copied).await?;
+                    Ok::<(), Error>(())
+                }));
             }
         }
     }
@@ -277,7 +282,7 @@ async fn parse_args() -> Result<Args> {
 
     if !is_accessible_dir(&kobo_directory).await {
         let inaccessible = kobo_directory.to_str().ok_or_else(|| {
-            anyhow!("could not decode Kobo directory path as UTF-8 while reporting its absense")
+            anyhow!("could not decode Kobo directory path as UTF-8 while reporting its absence")
         })?;
         return Err(anyhow!(
             "The Kobo storage directory at {inaccessible} is not accessible"

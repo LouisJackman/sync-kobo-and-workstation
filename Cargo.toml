@@ -4,7 +4,7 @@ authors = ["Louis Jackman"]
 version = "0.1.0"
 description = "Synchronise books between a workstation and a Kobo e-book reader."
 repository = "https://gitlab.com/louis.jackman/sync-kobo-and-workstation"
-license = "GPL-3.0-only"
+license = "AGPL-3.0-only"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
