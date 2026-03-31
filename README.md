@@ -1,6 +1,6 @@
 # Synchronise Kobo & Workstation
 
-[![pipeline status](https://gitlab.com/louis.jackman/sync-kobo-and-workstation/badges/master/pipeline.svg)](https://gitlab.com/louis.jackman/sync-kobo-and-workstation/-/commits/master)
+[![pipeline status](https://gitlab.com/louis.jackman/sync-kobo-and-workstation/badges/main/pipeline.svg)](https://gitlab.com/louis.jackman/sync-kobo-and-workstation/-/commits/main)
 
 Synchronise books between a workstation and a Kobo e-book reader. In practice,
 this means synchronising a connected Kobo volume with EPUB and PDF files in the
