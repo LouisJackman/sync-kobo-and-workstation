@@ -67,12 +67,12 @@ async fn is_accessible_dir(path: &Path) -> bool {
         .unwrap_or(false)
 }
 
-fn lookup_default_kobo_storage_directory() -> PathBuf {
+fn lookup_default_kobo_storage_directory() -> Result<PathBuf> {
     let mut buf = PathBuf::new();
     buf.push("/media");
-    buf.push(username());
+    buf.push(username()?);
     buf.push("KOBOeReader");
-    buf
+    Ok(buf)
 }
 
 fn lookup_home_directory() -> Result<PathBuf> {
@@ -269,9 +269,10 @@ struct Args {
 async fn parse_args() -> Result<Args> {
     let partial @ PartialArgs { dry_run, .. } = PartialArgs::parse();
 
-    let kobo_directory = partial
-        .kobo_directory
-        .unwrap_or_else(lookup_default_kobo_storage_directory);
+    let kobo_directory = match partial.kobo_directory {
+        Some(dir) => dir,
+        None => lookup_default_kobo_storage_directory()?,
+    };
 
     let documents_directories = partial.documents_directories.unwrap_or_else(|| {
         lookup_default_documents_directories().expect(
